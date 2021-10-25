@@ -15,7 +15,7 @@ python3 --version
 
 Ar trebui sa afiseze versiunea instalata.
 
-Pentru a instala Selenium, numpy, opencv, pyautogui si pyaudio, trebuie mai intai sa instalam pip - sistemul de management al librariilor pentru python:
+Pentru a instala Selenium, numpy, opencv, ~~pyautogui~~ pillow si pyaudio, trebuie mai intai sa instalam pip - sistemul de management al librariilor pentru python:
 ```
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
@@ -30,7 +30,7 @@ pip install opencv-python
 
 brew install portaudio
 
-pip install pyautogui
+pip install pillow
 pip install PyAudio
 ```
 
@@ -56,7 +56,18 @@ si modificati optiunea 2 si 3 astfel incat caile spre include si lib sa coincida
 
 ## Selenium Python API
 
-Pentru a folosi selenium, va fi nevoie de un driver de browser. Eu am folosit Chrome Driver. E nevoie de instalat o versiune compatibila cu browserul Google Chrome instalat pe calculator. Pentru a verifica versiunea browserului: apasati pe trei puncte de sus-dreapta a ferestrei browserului => Settings => About Chrome.
+Pentru a folosi selenium, va fi nevoie de un driver de browser. Eu am folosit Chrome Driver, prealabil avand Google Chrome instalat.
+
+Chromedriver poate fi instalat cu homebrew. Dupa instalare, e nevoie de ridicat carantina:
+```
+brew install chromedriver
+which chromedriver
+xattr -d com.apple.quarantine /calea/spre/chromedriver
+```
+
+Daca prima metoda nu merge, incercati urmatoarea:
+
+E nevoie de instalat o versiune compatibila cu browserul Google Chrome instalat pe calculator. Pentru a verifica versiunea browserului: apasati pe trei puncte de sus-dreapta a ferestrei browserului => Settings => About Chrome.
 
 De pe https://sites.google.com/chromium.org/driver/downloads descarcati versiunea respectiva de ChromeDriver, tinand cont si de sistema de operare.
 
@@ -76,4 +87,26 @@ Daca nici asta nu merge, instalati chromedriver cu homebrew si ridicati-i carant
 brew install chromedriver
 which chromedriver
 xattr -d com.apple.quarantine /calea/spre/chromedriver
+```
+
+## Utilizare
+
+Apelati din terminal 
+
+```
+python main.py
+```
+
+Acest script va deschide o fereastra de Google Chrome, va accesa youtube.com, va scrie in caseta de cautare un cuvant aleatoriu si il va acesa. Apoi, va alege un video oarecare din cele propuse si il va accesa. Cand videoul se va porni, va incepe inregistrarea desktopului dumneavoastra si a sunetului microfonului. Dupa 10 secunde, inregistrarea se va opri, se va salva cu denumirea output_timpul_si_data_inregistrarii_cuvantul_aleatoriu_cautat.mov in acelasi folder unde se afla si scriptul main.
+
+Pentru a alege un timp anume de inregistrare, adaugati timpul in secunde ca primul argument la apelare
+
+```
+python main.py 60
+```
+
+Pentru a alege un cuvant anumit care sa fie cautat, adaugati cuvantul ca al doilea argument la apelare
+
+```
+python main.py 60 hello
 ```
