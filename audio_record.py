@@ -1,33 +1,16 @@
-
 import pyaudio
 import wave
 import math
 import struct
 import audioop
+import config as c
 
-# def rms( data ):   # root mean square
-#     count = len(data)/2
-#     format = "%dh"%(count)
-#     shorts = struct.unpack( format, data )
-#     sum_squares = 0.0
-#     for sample in shorts:
-#         n = sample * (1.0/32768)
-#         sum_squares += n*n
-#     return math.sqrt( sum_squares / count )
-
-# def get_decibel(data):
-#     result = rms(data)
-#     if result == 0:
-#         return float('-inf')
-#     return 20 * math.log10(rms(data))
-
-def record_audio(duration, output_name):
+def record_audio(duration, output_name, logger):
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
     RECORD_SECONDS = duration
-    WAVE_OUTPUT_FILENAME = "audio_output.wav"
 
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, output=True, frames_per_buffer=CHUNK, input_device_index=0)
@@ -51,18 +34,23 @@ def record_audio(duration, output_name):
 
     print('max_decibel_level: ', max_decibel_volume)
     print('mean_decibel_level: ', mean_decibel_volume)    
-    with open('log_file.txt', 'a') as f:
-        f.write(output_name + ': ' + str(mean_decibel_volume) + '\n')
+    
     stream.stop_stream()
     stream.close()
     p.terminate()
-
-    wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(b''.join(frames))
-    wf.close()
+    try:
+        with open('info.txt', 'a') as f:
+            f.write(output_name + ': ' + str(mean_decibel_volume) + '\n')
+        wf = wave.open(c.WAVE_OUTPUT_FILENAME, 'wb')
+        wf.setnchannels(CHANNELS)
+        wf.setsampwidth(p.get_sample_size(FORMAT))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(frames))
+        wf.close()
+    except IOError as ioe:
+        print('\tERROR')
+        print(f'{ioe}')
+        logger.error(f'{ioe}')
 
 if __name__ == '__main__':
     record_audio(5)

@@ -1,4 +1,5 @@
 /__pycache__
 *.mov
 *.wav
+info.txt
 log_file.txt
