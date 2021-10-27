@@ -27,6 +27,8 @@ Pentru a instala librariile necesare:
 ```
 pip install selenium
 pip install opencv-python
+pip install scipy
+pip install random-word
 
 brew install portaudio
 

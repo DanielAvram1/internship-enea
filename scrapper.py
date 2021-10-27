@@ -29,18 +29,17 @@ class Scrapper:
             )
         
             search_word = None
+            
+            search_word = RandomWords().get_random_word()
             if special_word is not None:
                 search_word = special_word
-            while search_word is None:
-                search_word = RandomWords().get_random_word()
+            
             print(search_word)
             
             search.send_keys(search_word)
             search.send_keys(Keys.RETURN)
         except TimeoutException as te:
-            print('\tERROR')
-            print(f'No element with CSS SELECTOR {c.SEARCH_CSS_SELECTOR} was found.')
-            self.logger.error(f'No element with CSS SELECTOR {c.SEARCH_CSS_SELECTOR} was found.')
+            self.logger.write('error', f'No element with CSS SELECTOR {c.SEARCH_CSS_SELECTOR} was found.')
         finally:
             if search_word is not None:
                 return search_word
@@ -58,9 +57,7 @@ class Scrapper:
             no_results = WebDriverWait(self.driver, c.TIMEOUT).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, c.NO_RESULTS_CSS_SELECTOR))
             )
-            print(f'No results were found while searching for {search_word}, getting a random video from main page.')
-            self.logger.warning(f'No results were found while searching for {search_word}, getting a random video from main page.')
-            self.driver.get(c.URL)
+            self.logger.write('warning', f'No results were found while searching for {search_word}, getting a random video from main page.')
         except TimeoutException as te:
             self.logger.write('info', f'{search_word} gave video results.')
         thumbnail = None

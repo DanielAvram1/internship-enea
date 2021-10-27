@@ -3,14 +3,12 @@ from selenium.common.exceptions import WebDriverException, TimeoutException
 from logger import Logger
 from scrapper import Scrapper
 from screen_record import record_video
-from audio_record import record_audio
+from audio_record import record_audio, get_decibel_level
 from threading import Thread
 import subprocess
 from datetime import datetime
 import sys
 import config as c
-
-
 
 
 def main(myLogger, special_word=None, duration=10):
@@ -22,15 +20,20 @@ def main(myLogger, special_word=None, duration=10):
         output_file_name = 'output' + datetime.now().strftime("%d_%m_%Y_%H_%M_%S_") + search_word + '.mov'
 
         video_recording = Thread(target=record_video, args=(duration, ))
-        audio_recording = Thread(target=record_audio, args=(duration, output_file_name[:-4] ))
+        audio_recording = Thread(target=record_audio, args=(duration,  ))
         video_recording.start()
         audio_recording.start()
 
         video_recording.join()
         audio_recording.join()
         
+        decibel_level = get_decibel_level(c.WAVE_OUTPUT_FILENAME)
+        print('decibel level: ', decibel_level)
         output_file_name = 'output' + datetime.now().strftime("%d_%m_%Y_%H_%M_%S_") + search_word + '.mov'
         
+        with open('info.txt', 'a') as f:
+            f.write(output_file_name[:-4] + ': ' + str(decibel_level) + '\n')
+    
         print(output_file_name)
         try:
             subprocess.run(f'ffmpeg -hide_banner -loglevel error -i {c.MOV_OUTPUT_FILENAME } -i {c.WAVE_OUTPUT_FILENAME}  -c:v copy -c:a aac  {output_file_name}', shell=True)
@@ -38,6 +41,7 @@ def main(myLogger, special_word=None, duration=10):
             myLogger.write('error', f'{cpe}')
         
         myLogger.write('info', f'recording {output_file_name} was written with succes.')
+    
     except TimeoutException as te:
         myLogger.write('error', str(te.msg))
     
@@ -55,6 +59,7 @@ def main(myLogger, special_word=None, duration=10):
     
     finally:
         scrapper.quit()
+
 
 if __name__ == '__main__':
     duration = 10
