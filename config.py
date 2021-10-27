@@ -6,3 +6,4 @@ SEARCH_CSS_SELECTOR = 'input#search'
 PLAYER_ID = 'player'
 WAVE_OUTPUT_FILENAME = "audio_output.wav"
 MOV_OUTPUT_FILENAME = "video_output.mov"
+LOG_FILE_FILENAME = "log_file.log"

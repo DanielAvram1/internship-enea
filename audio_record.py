@@ -5,7 +5,7 @@ import struct
 import audioop
 import config as c
 
-def record_audio(duration, output_name, logger):
+def record_audio(duration, output_name):
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
@@ -38,19 +38,16 @@ def record_audio(duration, output_name, logger):
     stream.stop_stream()
     stream.close()
     p.terminate()
-    try:
-        with open('info.txt', 'a') as f:
-            f.write(output_name + ': ' + str(mean_decibel_volume) + '\n')
-        wf = wave.open(c.WAVE_OUTPUT_FILENAME, 'wb')
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(p.get_sample_size(FORMAT))
-        wf.setframerate(RATE)
-        wf.writeframes(b''.join(frames))
-        wf.close()
-    except IOError as ioe:
-        print('\tERROR')
-        print(f'{ioe}')
-        logger.error(f'{ioe}')
+    
+    with open('info.txt', 'a') as f:
+        f.write(output_name + ': ' + str(mean_decibel_volume) + '\n')
+    wf = wave.open(c.WAVE_OUTPUT_FILENAME, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+    
 
 if __name__ == '__main__':
     record_audio(5)
