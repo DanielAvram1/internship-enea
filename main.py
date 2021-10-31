@@ -2,8 +2,8 @@
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from logger import Logger
 from scrapper import Scrapper
-from screen_record import record_video
-from audio_record import record_audio, get_decibel_level
+from screen_record import ScreenRecorder
+from audio_record import AudioRecorder
 from threading import Thread
 import subprocess
 from datetime import datetime
@@ -18,18 +18,21 @@ def main(myLogger, special_word=None, duration=10):
         search_word = scrapper.browse_youtube(special_word=special_word)
 
         output_file_name = 'output' + datetime.now().strftime("%d_%m_%Y_%H_%M_%S_") + search_word + '.mov'
+        
+        audio_recorder = AudioRecorder(myLogger)
+        video_recorder = ScreenRecorder(myLogger)
 
-        video_recording = Thread(target=record_video, args=(duration, ))
-        audio_recording = Thread(target=record_audio, args=(duration,  ))
+        video_recording = Thread(target=video_recorder.record_video, args=(duration, ))
+        audio_recording = Thread(target=audio_recorder.record_audio, args=(duration,  ))
         video_recording.start()
         audio_recording.start()
 
         video_recording.join()
         audio_recording.join()
         
-        decibel_level = get_decibel_level(c.WAVE_OUTPUT_FILENAME)
+        decibel_level = audio_recorder.get_decibel_level(c.WAVE_OUTPUT_FILENAME)
         print('decibel level: ', decibel_level)
-        output_file_name = 'output' + datetime.now().strftime("%d_%m_%Y_%H_%M_%S_") + search_word + '.mov'
+        output_file_name = 'output' + datetime.now().strftime("%d_%m_%Y_%H_%M_%S_") + search_word.replace(' ', '_') + '.mov'
         
         with open('info.txt', 'a') as f:
             f.write(output_file_name[:-4] + ': ' + str(decibel_level) + '\n')

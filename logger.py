@@ -17,7 +17,8 @@ class Logger:
         self.logger.setLevel(logging.DEBUG)
     
     def write(self, type:str, message:str):
-        print(f'\t{ type.upper()  }')
+        if type != 'info':
+            print(f'\t{ type.upper()  }')
         print(message)
         if type == 'info':
             self.logger.info(message)

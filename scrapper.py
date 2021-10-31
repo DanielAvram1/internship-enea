@@ -5,21 +5,32 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import WebDriverException, NoSuchElementException, TimeoutException
 import time
-from screen_record import record_video
-from audio_record import record_audio
-from threading import Thread
-import os
-import subprocess
-from datetime import datetime
 from random_word import RandomWords
-import sys
 import config as c
-import logging
 
 class Scrapper:
     def __init__(self, logger):
         self.logger = logger
         self.driver = webdriver.Chrome()
+    
+
+
+    def __handle_cookies(self): 
+        try:
+            modal = WebDriverWait(self.driver, c.TIMEOUT).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'tp-yt-paper-dialog#dialog.style-scope.ytd-consent-bump-v2-lightbox' ))
+            )
+            self.logger.write('info', f'Cookie modal found')
+
+            self.driver.execute_script("""
+            var element = arguments[0];
+            element.parentNode.removeChild(element);
+            """, modal)
+            self.logger.write('info', f'Cookie modal deleted from page')
+            
+        except TimeoutException as te:
+            self.logger.write('info', f'No cookie modal found')
+            return
         
 
     def __search_random(self, special_word=None):
@@ -51,7 +62,9 @@ class Scrapper:
 
     def browse_youtube(self, special_word=None):
         self.driver.get(c.URL)
-        print('searching...')
+        self.logger.write('info','Looking for cookie info...')
+        self.__handle_cookies()
+        self.logger.write('info', 'searching...')
         search_word = self.__search_random( special_word=special_word)
         try:
             no_results = WebDriverWait(self.driver, c.TIMEOUT).until(
@@ -63,11 +76,11 @@ class Scrapper:
         thumbnail = None
         try:
             thumbnail = WebDriverWait(self.driver, c.TIMEOUT).until(
-                EC.presence_of_element_located((By.ID, c.THUMBNAIL_ID))
+                EC.presence_of_element_located((By.CSS_SELECTOR, c.THUMBNAIL_CSS_SELECTOR))
             )
-            print('Thumbnail was found.')
+            self.logger.write('info', 'Thumbnail was found.')
         except TimeoutException as te:
-            self.logger.write('error', f'No element with ID {c.THUMBNAIL_ID} was found.')
+            self.logger.write('error', f'No element with CSS SELECOR {c.THUMBNAIL_CSS_SELECTOR} was found.')
             self.driver.quit()
             return
 
@@ -75,7 +88,7 @@ class Scrapper:
             webdriver.ActionChains(self.driver).move_to_element(thumbnail).click(thumbnail).perform()
             try:
                 player = WebDriverWait(self.driver, c.TIMEOUT).until(
-                    EC.presence_of_element_located((By.ID, c.PLAYER_ID))
+                    EC.presence_of_element_located((By.CSS_SELECTOR, c.PLAYER_CSS_SELECTOR))
                 )
                 break
             except:
